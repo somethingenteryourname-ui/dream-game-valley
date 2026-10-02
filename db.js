@@ -35,6 +35,22 @@ CREATE TABLE IF NOT EXISTS orders (
   FOREIGN KEY(user_id) REFERENCES users(id),
   FOREIGN KEY(game_id) REFERENCES games(id)
 );
+
+CREATE TABLE IF NOT EXISTS settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
 `);
+
+// Seed default site settings the first time, so the storefront always has something to show.
+const defaults = {
+  site_title: 'Dream Game Valley',
+  site_tagline: 'Games made by one person, played by everyone.',
+  accent_color: '#8b7cff',
+};
+const insertDefault = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
+for (const [key, value] of Object.entries(defaults)) {
+  insertDefault.run(key, value);
+}
 
 module.exports = db;
