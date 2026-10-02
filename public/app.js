@@ -1,5 +1,19 @@
 let currentUser = null;
 
+async function loadSettings() {
+  const settings = await api('/api/settings');
+  if (settings.site_title) {
+    document.getElementById('siteTitle').textContent = settings.site_title;
+    document.title = settings.site_title;
+  }
+  if (settings.site_tagline) {
+    document.getElementById('siteTagline').textContent = settings.site_tagline;
+  }
+  if (settings.accent_color) {
+    document.documentElement.style.setProperty('--accent', settings.accent_color);
+  }
+}
+
 async function api(path, opts = {}) {
   const res = await fetch(path, {
     headers: { 'Content-Type': 'application/json' },
@@ -122,6 +136,7 @@ function checkPurchaseBanner() {
   }
 }
 
+loadSettings();
 loadMe();
 loadGames();
 checkPurchaseBanner();
