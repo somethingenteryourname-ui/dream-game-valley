@@ -121,6 +121,24 @@ app.post('/api/admin/setup', async (req, res) => {
   res.json({ ok: true, email });
 });
 
+// ============ SITE SETTINGS (name, tagline, accent color) ============
+
+app.get('/api/settings', (req, res) => {
+  const rows = db.prepare('SELECT key, value FROM settings').all();
+  const settings = {};
+  rows.forEach(r => { settings[r.key] = r.value; });
+  res.json(settings);
+});
+
+app.post('/api/admin/settings', requireLogin, requireAdmin, (req, res) => {
+  const { site_title, site_tagline, accent_color } = req.body;
+  const update = db.prepare('UPDATE settings SET value = ? WHERE key = ?');
+  if (site_title !== undefined) update.run(site_title, 'site_title');
+  if (site_tagline !== undefined) update.run(site_tagline, 'site_tagline');
+  if (accent_color !== undefined) update.run(accent_color, 'accent_color');
+  res.json({ ok: true });
+});
+
 // ============ GAMES (public catalog) ============
 
 app.get('/api/games', (req, res) => {
