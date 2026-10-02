@@ -15,6 +15,7 @@ async function init() {
   if (me.isAdmin) {
     document.getElementById('adminOnlyBox').classList.remove('hidden');
     loadOwnedGames();
+    loadSettingsIntoForm();
   } else {
     document.getElementById('notAllowedBox').classList.remove('hidden');
   }
@@ -72,6 +73,33 @@ async function removeGame(id) {
   if (!confirm('Remove this game?')) return;
   await api(`/api/admin/games/${id}`, { method: 'DELETE' });
   loadOwnedGames();
+}
+
+async function loadSettingsIntoForm() {
+  const settings = await api('/api/settings');
+  document.getElementById('siteTitleInput').value = settings.site_title || '';
+  document.getElementById('siteTaglineInput').value = settings.site_tagline || '';
+  document.getElementById('accentColorInput').value = settings.accent_color || '#8b7cff';
+}
+
+async function saveSettings(e) {
+  e.preventDefault();
+  try {
+    await api('/api/admin/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        site_title: document.getElementById('siteTitleInput').value,
+        site_tagline: document.getElementById('siteTaglineInput').value,
+        accent_color: document.getElementById('accentColorInput').value,
+      }),
+    });
+    document.getElementById('settingsSaved').textContent = 'Saved! Refresh the storefront to see it.';
+    setTimeout(() => { document.getElementById('settingsSaved').textContent = ''; }, 3000);
+  } catch (err) {
+    document.getElementById('settingsSaved').textContent = err.message;
+  }
+  return false;
 }
 
 init();
